@@ -1,4 +1,5 @@
-@echo off
-cd /d %~dp0
-node server.js
-pause
+@echo off
+cd /d %~dp0
+if not exist .env copy .env.example .env >nul
+node server.js
+pause

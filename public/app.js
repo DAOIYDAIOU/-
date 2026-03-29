@@ -23,6 +23,22 @@ const template = document.getElementById("productTemplate");
 document.getElementById("scrollDrop").onclick = () => window.scrollTo({ top: window.innerHeight * 0.82, behavior: "smooth" });
 document.getElementById("scrollCart").onclick = () => document.getElementById("cartSection").scrollIntoView({ behavior: "smooth" });
 
+function formatRub(value) {
+  return new Intl.NumberFormat("ru-RU", { style: "currency", currency: "RUB", maximumFractionDigits: 0 }).format(Number(value) || 0);
+}
+
+function getAvailability(product) {
+  return product.availability || (product.inStock === false ? "preorder" : "in_stock");
+}
+
+function getAvailabilityLabel(product) {
+  return getAvailability(product) === "preorder" ? "Под заказ" : "В наличии";
+}
+
+function canBuy(product) {
+  return ["in_stock", "preorder"].includes(getAvailability(product));
+}
+
 async function init() {
   const res = await fetch("/api/store");
   const data = await res.json();
@@ -54,9 +70,11 @@ function filteredProducts() {
   const mode = stockFilter.value;
   return state.products.filter(product => {
     const textMatch = !q || [product.title, product.category, product.description].join(" ").toLowerCase().includes(q);
+    const availability = getAvailability(product);
     const filterMatch =
       mode === "all" ? true :
-      mode === "instock" ? product.inStock :
+      mode === "instock" ? availability === "in_stock" :
+      mode === "preorder" ? availability === "preorder" :
       product.featured;
     return textMatch && filterMatch;
   });
@@ -71,17 +89,17 @@ function renderProducts() {
     node.querySelector(".product-image").src = product.image;
     node.querySelector(".product-image").alt = product.title;
     node.querySelector(".product-category").textContent = product.category || "Коллекция";
-    node.querySelector(".product-stock").textContent = product.inStock ? "В наличии" : "Нет в наличии";
+    node.querySelector(".product-stock").textContent = getAvailabilityLabel(product);
     node.querySelector(".product-title").textContent = product.title;
     node.querySelector(".product-description").textContent = product.description || "";
-    node.querySelector(".price-now").textContent = `$${product.price}`;
-    node.querySelector(".price-old").textContent = product.oldPrice ? `$${product.oldPrice}` : "";
+    node.querySelector(".price-now").textContent = formatRub(product.price);
+    node.querySelector(".price-old").textContent = product.oldPrice ? formatRub(product.oldPrice) : "";
 
     const badges = node.querySelector(".badges");
     if (product.featured) badges.append(makeBadge("Хит", "dark"));
     if (product.discount > 0) badges.append(makeBadge(`-${product.discount}%`, "sale"));
-    if (!product.inStock) badges.append(makeBadge("Нет в наличии", "out"));
-    if (product.badge && !["Хит","Sold out"].includes(product.badge)) badges.append(makeBadge(product.badge, "dark"));
+    if (getAvailability(product) === "preorder") badges.append(makeBadge("Под заказ", "out"));
+    if (product.badge && !["Хит", "Sold out"].includes(product.badge)) badges.append(makeBadge(product.badge, "dark"));
 
     const sizesWrap = node.querySelector(".sizes");
     (product.sizes || []).forEach(size => {
@@ -96,8 +114,8 @@ function renderProducts() {
     });
 
     const addBtn = node.querySelector(".add-btn");
-    addBtn.disabled = !product.inStock;
-    addBtn.textContent = product.inStock ? "Добавить" : "Недоступно";
+    addBtn.disabled = !canBuy(product);
+    addBtn.textContent = getAvailability(product) === "preorder" ? "Заказать" : "Добавить";
     addBtn.onclick = () => addToCart(product);
 
     productsEl.appendChild(node);
@@ -132,6 +150,7 @@ function addToCart(product) {
       price: Number(product.price),
       qty: 1,
       size,
+      availability: getAvailability(product),
       lineTotal: Number(product.price)
     });
   }
@@ -159,8 +178,8 @@ function renderCart() {
     const div = document.createElement("div");
     div.className = "cart-item";
     div.innerHTML = `
-      <div class="cart-line"><strong>${escapeHtml(item.title)}</strong><strong>$${item.lineTotal}</strong></div>
-      <small>Размер: ${escapeHtml(item.size)} • Кол-во: ${item.qty}</small>
+      <div class="cart-line"><strong>${escapeHtml(item.title)}</strong><strong>${formatRub(item.lineTotal)}</strong></div>
+      <small>Размер: ${escapeHtml(item.size)} • Кол-во: ${item.qty} • ${item.availability === "preorder" ? "Под заказ" : "В наличии"}</small>
       <button class="remove-btn">Убрать</button>
     `;
     div.querySelector(".remove-btn").onclick = () => removeFromCart(index);
@@ -168,7 +187,7 @@ function renderCart() {
   });
 
   cartCountEl.textContent = String(totalQty);
-  cartTotalEl.textContent = `$${total}`;
+  cartTotalEl.textContent = formatRub(total);
 }
 
 document.getElementById("checkoutBtn").onclick = async () => {

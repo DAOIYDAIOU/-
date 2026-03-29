@@ -11,6 +11,10 @@ const ADMIN_IDS_ENV = String(process.env.ADMIN_IDS || "").trim();
 const ADMIN_KEY = String(process.env.ADMIN_KEY || "trendsetter_admin_2026").trim();
 const STORE_FILE = path.join(__dirname, "data", "store.json");
 
+function formatRub(value) {
+  return new Intl.NumberFormat("ru-RU", { style: "currency", currency: "RUB", maximumFractionDigits: 0 }).format(Number(value) || 0);
+}
+
 if (!BOT_TOKEN) {
   console.error("Ошибка: BOT_TOKEN пустой.");
   process.exit(1);
@@ -204,7 +208,7 @@ bot.on("message", async (ctx) => {
     const data = JSON.parse(webAppData.data);
     if (data.type === "order") {
       const itemsText = (data.items || [])
-        .map(item => `• ${item.title} / ${item.size} / x${item.qty} — $${item.lineTotal}`)
+        .map(item => `• ${item.title} / ${item.size} / x${item.qty} — ${formatRub(item.lineTotal)}${item.availability === "preorder" ? " • под заказ" : ""}`)
         .join("\n");
       await ctx.reply("Заказ принят ✅");
       if (ADMIN_CHAT_ID) {

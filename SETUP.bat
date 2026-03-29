@@ -1,18 +1,21 @@
-\
 @echo off
+chcp 65001 >nul
 cd /d %~dp0
 echo ==========================================
-echo TRENDSETTER MARKET - SIMPLE SETUP V5
+echo TRENDSETTER MARKET - BOTHOST SETUP
 echo ==========================================
 echo.
-echo Vvedi admin ID bez probelov.
-echo Primer:
-echo 123456789,987654321,555666777
+echo 1) Vvedi BOT_TOKEN ot BotFather
+echo 2) Vvedi URL prilozheniya ot BotHost / Bothost
+echo    primer: https://your-project.bot-host.ru
+echo 3) Vvedi ID adminov cherez zapyatuyu
 echo.
-set /p BOT_TOKEN=Vvedi BOT_TOKEN ot BotFather: 
-set /p WEB_APP_URL=Vvedi WEB_APP_URL (ngrok https://...): 
-set /p ADMIN_IDS=Vvedi admin ID cherez zapyatuyu: 
-set /p ADMIN_KEY=Vvedi ADMIN_KEY: 
+set /p BOT_TOKEN=BOT_TOKEN: 
+set /p WEB_APP_URL=WEB_APP_URL (Bothost URL): 
+if "%WEB_APP_URL%"=="" set WEB_APP_URL=http://localhost:3000
+set /p ADMIN_IDS=ADMIN_IDS (123,456): 
+set /p ADMIN_KEY=ADMIN_KEY (Enter = trendsetter_admin_2026): 
+if "%ADMIN_KEY%"=="" set ADMIN_KEY=trendsetter_admin_2026
 
 set "ADMIN_IDS=%ADMIN_IDS: =%"
 for /f "tokens=1 delims=," %%a in ("%ADMIN_IDS%") do set FIRST_ADMIN_ID=%%a
@@ -34,7 +37,9 @@ call npm.cmd install
 echo.
 node check-token.js
 echo.
-echo PEREZAPUSTI:
-echo RUN_SERVER.bat
-echo RUN_BOT.bat
+echo Zapusk lokalno:
+echo   RUN_SERVER.bat
+echo   RUN_BOT.bat
+echo.
+echo Dlya Bothost repo uzhe gotov. V paneli ukazhi komandou zapuska: npm start
 pause

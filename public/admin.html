@@ -14,12 +14,30 @@
         <h2>TRENDSETTER MARKET Admin</h2>
       </div>
       <div class="filters">
-        <button id="reloadBtn" class="secondary-btn">Обновить</button>
+        <button id="reloadBtn" class="secondary-btn" style="margin-top:0;width:auto;">Обновить</button>
       </div>
     </div>
 
+    <section class="admin-panel admin-stats-panel">
+      <p class="eyebrow">БЫСТРЫЙ ОБЗОР</p>
+      <div id="statsGrid" class="stats-grid"></div>
+    </section>
+
     <div class="admin-grid">
       <section class="admin-panel">
+        <p class="eyebrow">CONTROL CENTER</p>
+        <div class="admin-form">
+          <input id="quickSearch" placeholder="Поиск по названию или категории" />
+          <select id="quickAvailabilityFilter">
+            <option value="all">Все товары</option>
+            <option value="in_stock">Только в наличии</option>
+            <option value="preorder">Только под заказ</option>
+            <option value="featured">Только хиты</option>
+          </select>
+        </div>
+
+        <hr style="border-color:rgba(255,255,255,.08);margin:20px 0;" />
+
         <p class="eyebrow">BANNER SETTINGS</p>
         <div class="admin-form">
           <select id="bannerEnabled">
@@ -38,8 +56,8 @@
         <div class="admin-form">
           <input id="title" placeholder="Название товара" />
           <div class="split">
-            <input id="price" type="text" inputmode="decimal" placeholder="Цена" />
-            <input id="oldPrice" type="text" inputmode="decimal" placeholder="Старая цена" />
+            <input id="price" type="text" inputmode="decimal" placeholder="Цена в рублях" />
+            <input id="oldPrice" type="text" inputmode="decimal" placeholder="Старая цена в рублях" />
           </div>
           <div class="split">
             <input id="discount" type="text" inputmode="numeric" placeholder="Скидка %" />
@@ -50,9 +68,9 @@
           <input id="badge" placeholder="Бейдж: New / Хит / Limited" />
           <textarea id="description" placeholder="Описание товара"></textarea>
           <div class="split">
-            <select id="inStock">
-              <option value="true">В наличии</option>
-              <option value="false">Нет в наличии</option>
+            <select id="availability">
+              <option value="in_stock">В наличии</option>
+              <option value="preorder">Под заказ</option>
             </select>
             <select id="featured">
               <option value="false">Обычный</option>
@@ -65,6 +83,10 @@
 
       <section class="admin-panel">
         <p class="eyebrow">ADMINS</p>
+        <div id="adminManageBox" class="admin-form hidden" style="margin-bottom:12px;">
+          <input id="newAdminId" placeholder="Telegram ID нового админа" />
+          <button id="addAdminBtn" class="admin-btn">Добавить админа</button>
+        </div>
         <div id="adminsAdmin" class="admin-table"></div>
 
         <hr style="border-color:rgba(255,255,255,.08);margin:20px 0;" />
